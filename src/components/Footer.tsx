@@ -82,25 +82,7 @@ const Footer = () => {
             </div>
 
             {/* Social Media */}
-            <div className="pt-4">
-              <h5 className="text-sm font-semibold mb-3">Follow Us</h5>
-              <div className="flex space-x-4">
-                <a 
-                  href="#" 
-                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-300"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-5 w-5" />
-                </a>
-                <a 
-                  href="#" 
-                  className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors duration-300"
-                  aria-label="Facebook"
-                >
-                  <Facebook className="h-5 w-5" />
-                </a>
-              </div>
-            </div>
+          
           </div>
         </div>
 

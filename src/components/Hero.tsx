@@ -22,7 +22,8 @@ const Hero = () => {
       {/* Background Image with Better Overlay */}
    <div 
   className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{ backgroundImage: `url('https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1950&q=80')` }}
+style={{ backgroundImage: `url('https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=1950&q=80')` }}
+
   role="img"
   aria-label="Professional business technology background"
 >

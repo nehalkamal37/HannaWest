@@ -1,5 +1,3 @@
-import teamPhoto from '../assets/team-photo.jpg';
-
 const About = () => {
   const stats = [
     { value: "5+", label: "Years Experience" },
@@ -15,7 +13,7 @@ const About = () => {
           {/* Content */}
           <div className="fade-in-left">
             <h2 className="text-4xl md:text-5xl font-playfair font-bold text-foreground mb-6">
-              About HannaWest Solutions
+              About HannaWest 
             </h2>
             
             <div className="space-y-6 text-muted-foreground leading-relaxed">
@@ -62,8 +60,8 @@ const About = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
               <img 
-                src={teamPhoto}
-                alt="HannaWest Solutions Team"
+                src="https://images.unsplash.com/photo-1556761175-129418cb2dfe"
+                alt="Teamwork Illustration"
                 className="relative rounded-2xl shadow-large w-full h-auto object-cover"
               />
             </div>

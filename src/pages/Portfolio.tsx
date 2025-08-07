@@ -36,7 +36,7 @@ const Portfolio = () => {
       description: "Innovative Management Solutions for Modern Healthcare Empowering healthcare practices with tailored support and operational excellence.",
      // description: "Full-featured e-commerce solution with inventory management, payment processing, and analytics.",
       image: "/axio.jpg",
-      tags: ["React", "Stripe", "Inventory", "Analytics"],
+      tags: ["Html", "Css", "Inventory", "Analytics"],
       fullDescription: "A complete e-commerce platform built for modern businesses...",
       technologies: ["React", "Next.js", "Stripe", "MongoDB", "Tailwind CSS"],
       outcome: "Increased sales conversion by 40% and reduced cart abandonment by 30%"
@@ -52,7 +52,70 @@ const Portfolio = () => {
       fullDescription: "An intuitive dashboard designed to optimize virtual assistant operations...",
       technologies: ["Vue.js", "Firebase", "Chart.js", "Vuetify"],
       outcome: "Improved team productivity by 60% and reduced project turnaround time by 35%"
-    }
+    },
+    {
+  id: 4,
+  title: "Apple Specialty Pharmacy",
+  category: "Healthcare Website",
+  description: "Modern care with personalized precision. A clean, HIPAA-aligned pharmacy web interface for patients and prescribers.",
+  image: "/apple.jpg",
+  tags: ["Next.js", "React", "Tailwind CSS", "Healthcare", "HIPAA"],
+  fullDescription: `Apple Specialty Pharmacy is a modern healthcare platform designed to provide personalized pharmaceutical services through a clean, user-friendly interface.
+
+Key Features:
+• Custom-built UI for patients and prescribers
+• Fully responsive design for mobile and desktop
+• Modern branding: “Modern Care” and “Personalized Precision”
+• Includes sections like Services, Prescriber Portal, Patient Resources, and Privacy Policy
+• HIPAA-aware structure ensuring secure handling of sensitive information
+• Integrated contact and navigation structure for streamlined communication`,
+  technologies: ["Next.js", "React", "Tailwind CSS", "Vercel Hosting"],
+  outcome: "Enhanced digital presence for a specialty pharmacy, providing clarity and accessibility for both patients and medical professionals."
+},
+{
+  id: 5,
+  title: "EssentialRx",
+  category: "Healthcare Platform",
+  description: "Redefining in-office medication dispensing through streamlined digital workflows for clinics and physicians.",
+  image: "/ess.jpg",
+  tags: ["Html", "Css", "Bootstrap", "Workflow Automation", "Physician Portal"],
+  fullDescription: `EssentialRx is a web-based healthcare platform focused on improving in-office medication dispensing. It supports physician practices with seamless workflows and automation to optimize medication delivery within clinics.
+
+Key Features:
+• Digital-first platform for physician-guided dispensing
+• Streamlined in-office workflows to reduce delays
+• Addressing challenges in patient engagement and inventory tracking
+• Interactive feature sections and workflow case studies
+• Built-in support for physician feedback loops
+• Clinic-centered UI for easy onboarding and management
+• Operating hours support interface (Monday – Saturday, 8AM to 10PM)
+• Click-to-call integration for immediate support`,
+  technologies: ["Html", "Css", "Bootstrap", "Vercel"],
+  outcome: "Transformed traditional medication dispensing workflows into fully digital operations for physician-led practices, boosting speed and reducing paperwork."
+}
+,
+{
+  id: 6,
+  title: "MediHive Rx",
+  category: "Digital Healthcare",
+  description: "Maximizing in-office dispensing impact through analytics and automation.",
+  image: "/medi.jpg",
+  tags: ["Analytics", "Automation", "IOD Services", "Healthcare Tech"],
+  fullDescription: `MediHive Rx is a data-driven platform dedicated to enhancing in-office dispensing (IOD) effectiveness. It leverages smart analytics, automation, and decision-making tools to improve medication dispensing outcomes and operational efficiency for medical practices.
+
+Key Highlights:
+• Real-time analytics for IOD performance
+• Smart dashboards for efficiency tracking
+• Automation in physician decision-making
+• Strategic insights for better patient outcomes
+• Seamless UI with accessible navigation
+• Focused on maximizing in-office dispensing impact
+• Scalable and tailored for mid-size healthcare providers`,
+  technologies: ["React", "TypeScript", "Tailwind CSS", "Chart.js"],
+  outcome: "Improved in-office dispensing efficiency by 55% and enabled data-backed decision making for physicians."
+}
+
+
   ];
 
   return (

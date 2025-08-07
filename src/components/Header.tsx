@@ -51,7 +51,7 @@ const Header = () => {
             className="text-2xl font-playfair font-bold text-primary hover:text-primary-hover transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 rounded-md"
             aria-label="HannaWest Solutions - Return to homepage"
           >
-            HannaWest Solutions
+            HannaWest 
           </Link>
 
           {/* Desktop Navigation */}

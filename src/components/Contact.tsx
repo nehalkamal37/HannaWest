@@ -1,246 +1,378 @@
-import { useState } from 'react';
-import { MapPin, Phone, Mail, Send, CheckCircle } from 'lucide-react';
-import { useToast } from '../hooks/use-toast';
+"use client";
 
-const Contact = () => {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
+import { useState, useMemo, useRef } from "react";
+import { MapPin, Phone, Mail, Send, Clock, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { motion, useInView, useReducedMotion } from "framer-motion";
+
+type Status = "idle" | "sending" | "ok" | "err";
+const WEB3FORMS_KEY = "a98c8db2-f1af-49c9-a60f-7351c90d2368";
+
+export default function Contact() {
+  const reduce = useReducedMotion();
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const inView = useInView(sectionRef, { once: true, amount: 0.25 });
+
+  // form state
+  const [status, setStatus] = useState<Status>("idle");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    subject: "",
+    message: "",
+    botcheck: "", // honeypot
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const contactMethods = useMemo(
+    () => [
+      { icon: Phone, label: "Call us", text: "+1 (901) 697-0621", href: "tel:+19016970621" },
+      { icon: Mail, label: "Email", text: "m.a.hannalla@gmail.com", href: "mailto:m.a.hannalla@gmail.com" },
+      { icon: MapPin, label: "Address", text: "1337 Whitewater Rd, Memphis, TN 38117" },
+    ],
+    []
+  );
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Simulate form submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast({
-        title: "Message Sent!",
-        description: "Thank you for your message. We'll get back to you within 24 hours.",
-      });
-
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const contactInfo = [
-    {
-      icon: MapPin,
-      title: "Address",
-      content: "1337 Whitewater Rd\nMemphis, Tennessee 38117"
-    },
-    {
-      icon: Phone,
-      title: "Phone",
-      content: "+1 (901) 697-0621",
-      link: "tel:+19016970621"
-    },
-    {
-      icon: Mail,
-      title: "Email",
-      content: "m.a.hannalla@gmail.com",
-      link: "mailto:m.a.hannalla@gmail.com"
-    }
+  const reasons = [
+    "Custom software & integrations",
+    "Virtual assistant setup & scaling",
+    "HIPAA-aware workflows",
+    "Timelines & estimates",
   ];
 
+  function onChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    const { name, value, type, checked } = e.target as any;
+    setForm((s) => ({ ...s, [name]: type === "checkbox" ? (checked ? "1" : "") : value }));
+    setErrors((er) => ({ ...er, [name]: "" }));
+  }
+
+  function validate() {
+    const er: Record<string, string> = {};
+    if (!form.name.trim()) er.name = "Please enter your name.";
+    if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email)) er.email = "Please enter a valid email.";
+    if (!form.message.trim()) er.message = "Please add a short message.";
+    return er;
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const er = validate();
+    if (Object.keys(er).length) {
+      setErrors(er);
+      setStatus("err");
+      return;
+    }
+    if (form.botcheck) return;
+
+    setStatus("sending");
+    try {
+      const payload = {
+        access_key: WEB3FORMS_KEY,
+        from_name: "Hannalla Website",
+        subject: form.subject?.trim() ? form.subject : `New contact from ${form.name}`,
+        name: form.name,
+        email: form.email,
+        message: form.message,
+        reply_to: form.email,
+        // redirect: "https://yourdomain.com/thanks",
+      };
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setStatus("ok");
+        setForm({ name: "", email: "", subject: "", message: "", botcheck: "" });
+        setErrors({});
+      } else {
+        setStatus("err");
+        console.error("Web3Forms error:", data);
+      }
+    } catch (err) {
+      console.error(err);
+      setStatus("err");
+    }
+  }
+
   return (
-    <section id="contact" className="section-padding bg-gradient-subtle">
-      <div className="container-custom">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-playfair font-bold text-foreground mb-6 fade-in-up">
-            Get in Touch
+    <section
+      id="contact"
+      ref={sectionRef}
+      aria-labelledby="contact-heading"
+      className="
+        relative py-20 md:py-28
+        bg-gradient-to-b from-indigo-50 via-white to-cyan-5
+        dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950
+        overflow-hidden
+      "
+    >
+      {/* decorative */}
+      <div className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(60%_60%_at_50%_40%,#000,transparent)]">
+        <div className="absolute -top-20 -left-24 w-80 h-80 rounded-full bg-indigo-500/10 dark:bg-indigo-500/20 blur-3xl" />
+        <div className="absolute -bottom-16 -right-24 w-96 h-96 rounded-full bg-cyan-400/10 dark:bg-cyan-400/20 blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-6 lg:px-8 relative z-10">
+        {/* Header */}
+        <motion.div
+          className="text-center max-w-3xl mx-auto mb-14 md:mb-16"
+          initial={{ opacity: 0, y: 14 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+        >
+          <div className="inline-flex items-center gap-2 text-xs tracking-wider uppercase text-indigo-700/80 dark:text-cyan-300/90 bg-indigo-100/60 dark:bg-white/10 rounded-full px-3 py-1 mb-4">
+            <ShieldCheck className="h-4 w-4" /> We reply within 24 hours
+          </div>
+          <h2 id="contact-heading" className="text-4xl md:text-5xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            Let’s start a conversation
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Ready to transform your business? Let's discuss how we can help you achieve your goals.
+          <p className="mt-4 text-lg md:text-xl text-slate-600 dark:text-slate-300">
+            Tell us about your goals, and we’ll suggest the fastest, safest way to get there.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
-          {/* Contact Information */}
-          <div className="fade-in-left" style={{ animationDelay: '0.2s' }}>
-            <h3 className="text-2xl font-playfair font-semibold text-foreground mb-8">
-              Contact Information
-            </h3>
-            
-            <div className="space-y-6">
-              {contactInfo.map((info, index) => (
-                <div key={index} className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                    <info.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-foreground mb-1">{info.title}</h4>
-                    {info.link ? (
-                      <a 
-                        href={info.link}
-                        className="text-muted-foreground hover:text-primary transition-colors duration-300 whitespace-pre-line"
-                      >
-                        {info.content}
-                      </a>
-                    ) : (
-                      <p className="text-muted-foreground whitespace-pre-line">{info.content}</p>
-                    )}
-                  </div>
+        {/* Contact method cards */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+          initial={{ opacity: 0, y: 10 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.05 }}
+        >
+          {contactMethods.map((m, i) => (
+            <motion.div
+              key={m.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: 0.08 * i }}
+              className="rounded-xl p-5 bg-white/70 dark:bg-white/5 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm hover:shadow-md transition"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-500/15 to-cyan-400/15 grid place-items-center">
+                  <m.icon className="h-6 w-6 text-indigo-700 dark:text-cyan-300" />
                 </div>
-              ))}
-            </div>
-
-            {/* Business Hours */}
-            <div className="mt-12 p-6 bg-card rounded-xl border border-border/50">
-              <h4 className="font-semibold text-foreground mb-4">Business Hours</h4>
-              <div className="space-y-2 text-muted-foreground">
-                <div className="flex justify-between">
-                  <span>Monday - Friday</span>
-                  <span>9:00 AM - 6:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Saturday</span>
-                  <span>10:00 AM - 4:00 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sunday</span>
-                  <span>Closed</span>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-slate-900 dark:text-white">{m.label}</div>
+                  {m.href ? (
+                    <a href={m.href} className="text-slate-600 dark:text-slate-300 hover:text-indigo-700 dark:hover:text-cyan-300 break-words">
+                      {m.text}
+                    </a>
+                  ) : (
+                    <p className="text-slate-600 dark:text-slate-300">{m.text}</p>
+                  )}
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          ))}
+        </motion.div>
 
-          {/* Contact Form */}
-          <div className="fade-in-right" style={{ animationDelay: '0.3s' }}>
-            <div className="bg-card rounded-xl p-8 shadow-soft border border-border/50">
-              <h3 className="text-2xl font-playfair font-semibold text-foreground mb-6">
-                Send us a Message
-              </h3>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                      Name *
-                    </label>
+        {/* Main content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Form */}
+          <motion.div
+            className="lg:col-span-2 rounded-2xl p-6 md:p-8 bg-white/70 dark:bg-white/5 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm"
+            initial={{ opacity: 0, x: 12 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5 }}
+          >
+            <h3 className="text-2xl font-semibold text-slate-900 dark:text-white mb-6">Send us a message</h3>
+
+            {/* Alerts */}
+            {status === "ok" && (
+              <div role="alert" className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-emerald-800 dark:bg-emerald-900/20 dark:border-emerald-800/40 dark:text-emerald-200">
+                ✅ Message sent! We’ll get back to you within 24 hours.
+              </div>
+            )}
+            {status === "err" && Object.keys(errors).length > 0 && (
+              <div role="alert" className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800 dark:bg-amber-900/20 dark:border-amber-800/40 dark:text-amber-200">
+                Please fix the highlighted fields.
+              </div>
+            )}
+            {status === "err" && Object.keys(errors).length === 0 && (
+              <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-800 dark:bg-red-900/20 dark:border-red-800/40 dark:text-red-200">
+                Something went wrong. Please try again.
+              </div>
+            )}
+
+            <form onSubmit={onSubmit} noValidate className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Field
+                  id="name"
+                  label="Name *"
+                  error={errors.name}
+                  input={
                     <input
-                      type="text"
                       id="name"
                       name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 bg-background"
+                      type="text"
+                      value={form.name}
+                      onChange={onChange}
+                      className={cnInput(errors.name)}
                       placeholder="Your full name"
+                      required
                     />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                      Email *
-                    </label>
+                  }
+                />
+                <Field
+                  id="email"
+                  label="Email *"
+                  error={errors.email}
+                  input={
                     <input
-                      type="email"
                       id="email"
                       name="email"
-                      value={formData.email}
-                      onChange={handleChange}
+                      type="email"
+                      value={form.email}
+                      onChange={onChange}
+                      className={cnInput(errors.email)}
+                      placeholder="you@company.com"
                       required
-                      className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 bg-background"
-                      placeholder="your.email@company.com"
                     />
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                    Subject
-                  </label>
+                  }
+                />
+              </div>
+
+              <Field
+                id="subject"
+                label="Subject"
+                input={
                   <input
-                    type="text"
                     id="subject"
                     name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 bg-background"
-                    placeholder="Project inquiry, consultation, etc."
+                    type="text"
+                    value={form.subject}
+                    onChange={onChange}
+                    className={cnInput()}
+                    placeholder="How can we help?"
                   />
-                </div>
-                
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                    Message *
-                  </label>
+                }
+              />
+
+              <Field
+                id="message"
+                label="Message *"
+                error={errors.message}
+                input={
                   <textarea
                     id="message"
                     name="message"
                     rows={6}
-                    value={formData.message}
-                    onChange={handleChange}
+                    value={form.message}
+                    onChange={onChange}
+                    className={cnInput(errors.message) + " resize-none"}
+                    placeholder="Tell us a bit about your goals, timeline, and constraints."
                     required
-                    className="w-full px-4 py-3 border border-input rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors duration-300 bg-background resize-none"
-                    placeholder="Tell us about your project or how we can help..."
                   />
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-primary to-accent text-primary-foreground font-semibold py-4 px-8 rounded-lg shadow-soft hover:shadow-medium transform hover:-translate-y-1 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Send className="h-5 w-5" />
-                      <span>Send Message</span>
-                    </>
-                  )}
-                </button>
-              </form>
+                }
+              />
+
+              {/* Honeypot (hidden) */}
+              <input
+                type="checkbox"
+                name="botcheck"
+                checked={!!form.botcheck}
+                onChange={onChange as any}
+                tabIndex={-1}
+                className="hidden"
+                style={{ display: "none" }}
+                aria-hidden="true"
+              />
+
+              <button
+                type="submit"
+                disabled={status === "sending"}
+                aria-busy={status === "sending"}
+                className="
+                  w-full rounded-lg px-6 py-3.5 font-semibold text-white
+                  bg-gradient-to-r from-indigo-600 to-cyan-500
+                  hover:from-indigo-500 hover:to-cyan-400
+                  shadow-md hover:shadow-lg transition-all
+                  disabled:opacity-50 disabled:cursor-not-allowed
+                "
+              >
+                {status === "sending" ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="w-5 h-5 border-2 border-white/40 border-t-white rounded-full animate-spin" aria-hidden />
+                    Sending...
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <Send className="h-5 w-5" aria-hidden />
+                    Send Message
+                  </span>
+                )}
+              </button>
+            </form>
+
+            {/* small trust strip */}
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-300" />
+              <span>Secure delivery via Web3Forms • Replies within 24h • No spam</span>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Side details */}
+          <motion.aside
+            initial={{ opacity: 0, x: -12 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="space-y-6"
+          >
+            <div className="rounded-2xl p-6 bg-white/70 dark:bg-white/5 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <Clock className="h-5 w-5 text-indigo-700 dark:text-cyan-300" aria-hidden />
+                <h3 className="font-semibold text-slate-900 dark:text-white">Business Hours (CST)</h3>
+              </div>
+              <dl className="space-y-2 text-slate-600 dark:text-slate-300">
+                <div className="flex justify-between"><dt>Mon–Fri</dt><dd>9:00 AM – 6:00 PM</dd></div>
+                <div className="flex justify-between"><dt>Saturday</dt><dd>10:00 AM – 4:00 PM</dd></div>
+                <div className="flex justify-between"><dt>Sunday</dt><dd>Closed</dd></div>
+              </dl>
+            </div>
+
+            <div className="rounded-2xl p-6 bg-white/70 dark:bg-white/5 backdrop-blur ring-1 ring-black/5 dark:ring-white/10 shadow-sm">
+              <h3 className="font-semibold text-slate-900 dark:text-white mb-3">Why reach out?</h3>
+              <ul className="space-y-2">
+                {reasons.map((r) => (
+                  <li key={r} className="flex items-start gap-2 text-slate-600 dark:text-slate-300">
+                    <CheckCircle2 className="h-5 w-5 mt-0.5 text-indigo-600 dark:text-cyan-300" />
+                    <span>{r}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.aside>
         </div>
       </div>
     </section>
   );
-};
+}
 
-export default Contact;
+/* ---------- small helpers ---------- */
+
+function Field({
+  id, label, input, error,
+}: { id: string; label: string; input: React.ReactNode; error?: string }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm font-medium text-slate-900 dark:text-slate-200 mb-2">
+        {label}
+      </label>
+      {input}
+      {error && <p id={`${id}-error`} className="mt-1 text-sm text-red-600 dark:text-red-300">{error}</p>}
+    </div>
+  );
+}
+
+function cnInput(hasError?: string) {
+  return `
+    w-full px-4 py-3 rounded-lg
+    bg-white/60 dark:bg-white/10
+    border ${hasError ? "border-red-400 dark:border-red-500" : "border-slate-200/80 dark:border-white/10"}
+    text-slate-900 dark:text-white
+    placeholder:text-slate-400 dark:placeholder:text-slate-500
+    focus:outline-none focus:ring-2 ${hasError ? "focus:ring-red-200 dark:focus:ring-red-800" : "focus:ring-indigo-200 dark:focus:ring-cyan-700"} focus:border-indigo-500
+    transition
+  `;
+}

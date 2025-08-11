@@ -1,0 +1,50 @@
+@layer base {
+  :root {
+    /* نفس الهيو/السيتوريشن – قلّلنا الـL (اللايتنس) شوية */
+    --background: 0 0% 98%;          /* كان 100% => خلفية أغمق بنسبة بسيطة */
+    --foreground: 222.2 47.4% 9%;    /* كان 11.2% => نص أغمق سنة */
+
+    --card: 0 0% 98%;                /* كان 100% */
+    --card-foreground: 222.2 47.4% 9%;
+
+    --muted: 210 40% 94%;            /* كان 96.1% */
+    --muted-foreground: 215.4 16.3% 40%; /* كان 46.9% */
+
+    --border: 214.3 31.8% 86%;       /* كان 91.4% */
+    --input: 214.3 31.8% 86%;
+    --ring: 221.2 83.2% 46%;         /* كان 53.3% */
+
+    /* البراند: نفس الهيو/السيتوريشن، قلّلنا اللايتنس ~7% */
+    --primary: 221.2 83.2% 46%;          /* كان 53.3% */
+    --primary-foreground: 210 40% 98%;
+    --primary-hover: 221.2 83.2% 42%;
+
+    --secondary: 210 40% 94%;            /* كان 96.1% */
+    --secondary-foreground: 222.2 47.4% 9%;
+
+    --accent: 199 89% 42%;               /* كان 48% */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 45%;            /* كان 51% */
+    --destructive-foreground: 210 40% 98%;
+
+    --popover: 0 0% 98%;
+    --popover-foreground: 222.2 47.4% 9%;
+
+    /* radius كما هو */
+    --radius: 12px;
+
+    /* لو بتستخدم قيم الـsidebar سيبها زي ما هي أو اخفض اللايتنس بسيط */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 47.4% 9%;
+    --sidebar-primary: 221.2 83.2% 46%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 210 40% 94%;
+    --sidebar-accent-foreground: 222.2 47.4% 9%;
+    --sidebar-border: 214.3 31.8% 86%;
+    --sidebar-ring: 221.2 83.2% 46%;
+  }
+
+  /* يضمن إن الخلفية/النص ياخدوا الثيم */
+  body { @apply bg-background text-foreground; }
+}
